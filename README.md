@@ -1,4 +1,4 @@
-# Claude Swap
+# Claude Swap Desktop
 
 <p align="center">
   <img src="src/renderer/ui-wide.png" alt="Claude Swap — glass popover showing every Claude account's 5h and 7d quota" width="900"/>

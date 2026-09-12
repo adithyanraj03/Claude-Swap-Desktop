@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+    />
+    <title>Claude Swap</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app" data-view="list">
+      <!-- Slow-drifting colour under the glass: the "liquid" in liquid glass. -->
+      <div class="ambient" aria-hidden="true">
+        <span class="blob b1"></span>
+        <span class="blob b2"></span>
+        <span class="blob b3"></span>
+      </div>
+      <div class="veil" aria-hidden="true"></div>
+
+      <div id="frame">
+      <header class="bar">
+        <div class="brand">
+          <span class="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3.5 10a8.5 8.5 0 0 1 14.2-4.3L21 9" />
+              <path d="M21 4v5h-5" />
+              <path d="M20.5 14a8.5 8.5 0 0 1-14.2 4.3L3 15" />
+              <path d="M3 20v-5h5" />
+            </svg>
+          </span>
+          <div class="titles">
+            <strong>Claude Swap</strong>
+            <em id="subtitle">Loading accounts…</em>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="btn-refresh" class="icon" title="Refresh now" aria-label="Refresh now">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12a9 9 0 1 1-2.6-6.4" /><path d="M21 3v6h-6" />
+            </svg>
+          </button>
+          <button id="btn-lock" class="icon" title="Lock switching" aria-label="Lock switching">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4.5" y="10.5" width="15" height="10.5" rx="2.6" />
+              <path class="shackle-shut" d="M8.2 10.5V7a3.8 3.8 0 0 1 7.6 0v3.5" />
+              <path class="shackle-open" d="M8.2 10.5V7a3.8 3.8 0 0 1 7.3-1.3" />
+            </svg>
+          </button>
+          <button id="btn-pin" class="icon" title="Keep open (don't hide on focus loss)" aria-label="Keep open">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 17v5" /><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6Z" />
+            </svg>
+          </button>
+          <button id="btn-settings" class="icon" title="Settings" aria-label="Settings">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3.2" />
+              <path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z" />
+            </svg>
+          </button>
+          <button id="btn-close" class="icon" title="Close" aria-label="Close">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <div id="banner" class="banner" hidden></div>
+
+      <!-- List view -->
+      <div class="view view-list">
+        <main id="list" class="list" role="list"></main>
+        <footer class="foot">
+          <span id="stamp" class="stamp">—</span>
+          <button id="btn-best" class="ghost" title="Switch to the account with the most quota left">
+            Most headroom
+          </button>
+        </footer>
+      </div>
+
+      <!-- Settings view -->
+      <div class="view view-settings">
+        <div class="settings-scroll">
+          <section class="group">
+            <h3>Glass</h3>
+            <div class="row">
+              <label>Backdrop</label>
+              <div class="segmented" id="seg-material">
+                <button data-value="acrylic">Acrylic</button>
+                <button data-value="mica">Mica</button>
+                <button data-value="none">Solid</button>
+              </div>
+            </div>
+            <div class="row">
+              <label for="rng-opacity">Window opacity <span id="val-opacity" class="num"></span></label>
+              <input id="rng-opacity" type="range" min="45" max="100" step="1" />
+            </div>
+            <div class="row">
+              <label for="rng-tint">Glass tint <span id="val-tint" class="num"></span></label>
+              <input id="rng-tint" type="range" min="0" max="100" step="1" />
+            </div>
+            <div class="row">
+              <label>Theme</label>
+              <div class="segmented" id="seg-theme">
+                <button data-value="dark">Dark</button>
+                <button data-value="light">Light</button>
+                <button data-value="system">System</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="group">
+            <h3>Behaviour</h3>
+            <label class="check"><input type="checkbox" id="chk-launch" /><span>Start at login</span></label>
+            <label class="check"><input type="checkbox" id="chk-ontop" /><span>Always on top</span></label>
+            <label class="check"><input type="checkbox" id="chk-blur" /><span>Hide when it loses focus</span></label>
+            <label class="check"><input type="checkbox" id="chk-lock" /><span>Lock switching</span></label>
+            <label class="check"><input type="checkbox" id="chk-confirm" /><span>Confirm before switching</span></label>
+            <label class="check"><input type="checkbox" id="chk-warn" /><span>Warn if Claude Code is running</span></label>
+            <label class="check"><input type="checkbox" id="chk-accent" /><span>Colour the tray icon by usage</span></label>
+            <div class="row">
+              <label for="sel-poll">Refresh every</label>
+              <select id="sel-poll">
+                <option value="30">30 seconds</option>
+                <option value="60">1 minute</option>
+                <option value="120">2 minutes</option>
+                <option value="300">5 minutes</option>
+                <option value="600">10 minutes</option>
+              </select>
+            </div>
+            <p class="hint">
+              claude-swap caches quota for 180s and paces its own polling, so a fast refresh
+              here re-reads the cache rather than the API.
+            </p>
+          </section>
+
+          <section class="group">
+            <h3>About</h3>
+            <p class="hint" id="about-text">—</p>
+            <div class="btn-row">
+              <button id="btn-tui" class="ghost">Open cswap TUI</button>
+              <button id="btn-reset-size" class="ghost">Reset size</button>
+              <button id="btn-quit" class="ghost danger">Quit</button>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      </div><!-- /#frame -->
+
+      <!-- Switch confirmation -->
+      <div id="confirm" class="sheet" hidden>
+        <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+          <h2 id="confirm-title">Switch account?</h2>
+          <div class="swap-line">
+            <span class="chip from" id="confirm-from">—</span>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow">
+              <path d="M5 12h13" /><path d="M13 6l6 6-6 6" />
+            </svg>
+            <span class="chip to" id="confirm-to">—</span>
+          </div>
+          <p class="sheet-note" id="confirm-note"></p>
+          <div class="sheet-actions">
+            <button id="confirm-cancel" class="ghost">Cancel</button>
+            <button id="confirm-go" class="primary">Switch</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="grip" title="Drag to resize — double-click to reset" aria-hidden="true">
+        <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor"
+             stroke-width="1.4" stroke-linecap="round">
+          <path d="M10.5 1.5 1.5 10.5" /><path d="M6.5 1.5 1.5 6.5" /><path d="M10.5 5.5 5.5 10.5" />
+        </svg>
+      </div>
+
+      <div id="toast" class="toast" hidden></div>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,67 @@
+{
+  "name": "claude-swap-desktop",
+  "productName": "Claude Swap",
+  "version": "2.0.0",
+  "description": "Tray companion for claude-swap \u2014 glass popover to watch quota and switch Claude accounts",
+  "main": "src/main/main.js",
+  "author": {
+    "name": "Adithya N Raj",
+    "email": "adithyanraj03@gmail.com"
+  },
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "icons": "node tools/gen-icons.js",
+    "dist": "npm run icons && electron-builder --win",
+    "pack": "npm run icons && electron-builder --win --dir"
+  },
+  "devDependencies": {
+    "electron": "^44.3.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.adithya.claudeswap",
+    "productName": "Claude Swap",
+    "artifactName": "${productName}-${version}-${arch}.${ext}",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "build/icon.ico",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Claude Swap",
+      "deleteAppDataOnUninstall": false
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.${ext}"
+    }
+  }
+}

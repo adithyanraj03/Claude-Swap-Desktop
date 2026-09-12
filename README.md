@@ -60,14 +60,14 @@ npm start
 ## Screenshots
 
 <p align="center">
-  <img src="src/renderer/ui-list.png" alt="Default list view" width="440"/>
-  <img src="src/renderer/ui-light.png" alt="Light theme" width="440"/>
+  <img src="src/renderer/ui-list.png" alt="Default list view" width="340"/>
+  <img src="src/renderer/ui-light.png" alt="Light theme" width="340"/>
 </p>
 <p align="center"><sub>Default list view — 5h / 7d meters and reset countdowns &nbsp;·&nbsp; Light theme</sub></p>
 
 <p align="center">
-  <img src="src/renderer/ui-confirm.png" alt="Confirm sheet" width="440"/>
-  <img src="src/renderer/ui-about.png" alt="Settings and about" width="440"/>
+  <img src="src/renderer/ui-confirm.png" alt="Confirm sheet" width="340"/>
+  <img src="src/renderer/ui-about.png" alt="Settings and about" width="340"/>
 </p>
 <p align="center"><sub>Confirm sheet — warns about live Claude Code sessions &nbsp;·&nbsp; Settings + about — detected CLI version and path</sub></p>
 

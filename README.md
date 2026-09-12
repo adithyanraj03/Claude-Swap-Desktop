@@ -31,13 +31,20 @@ at least one account.
 uv tool install claude-swap        # recommended
 # pipx install claude-swap         # alternative
 
-# 2. add your accounts (log into Claude Code with an account, then:)
-cswap add
+# 2. add your first account (be logged into Claude Code with it)
 cswap add
 
-# 3. verify
+# 3. add the next account: open Claude Code, run /login and sign in with
+#    the other account, then
+cswap add
+
+# 4. verify
 cswap list
 ```
+
+> **Note** — when adding further accounts, never log out of an existing one
+> (no `/logout`): Claude Code may revoke the refresh token stored for the
+> account you are leaving.
 
 The app auto-detects the CLI at launch on `PATH` and in the well-known install
 locations (`~/.local/bin`, the uv tool Scripts dir, Python Scripts, `~/.cargo/bin`,

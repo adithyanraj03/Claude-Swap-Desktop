@@ -21,8 +21,6 @@ const DEFAULTS = {
   launchAtLogin: false,
   locked: true, // guard: a stray click must not switch the account
   size: null, // {width, height} once resized by hand; null = fit to content
-  locked: true, // guard against a stray click switching the account
-  position: null, // {x, y} once dragged; null = anchor to the tray icon
 
   // Integration
   cswapPath: '', // override; empty = auto-detect on PATH
@@ -73,10 +71,15 @@ class Settings {
       v[key] = Boolean(v[key]);
     }
     v.cswapPath = typeof v.cswapPath === 'string' ? v.cswapPath : '';
-    const pos = v.position;
-    v.position =
-      pos && Number.isFinite(Number(pos.x)) && Number.isFinite(Number(pos.y))
-        ? { x: Math.round(Number(pos.x)), y: Math.round(Number(pos.y)) }
+    // A hand-set window size, or null for fit-to-content. Bounded here so a
+    // corrupt file cannot produce an unusable window.
+    const size = v.size;
+    v.size =
+      size && Number.isFinite(Number(size.width)) && Number.isFinite(Number(size.height))
+        ? {
+            width: num(size.width, 330, 1500, 392),
+            height: num(size.height, 220, 900, 420),
+          }
         : null;
   }
 

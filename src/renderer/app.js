@@ -306,15 +306,22 @@ function setRange(selector, value, valueSelector, format) {
 }
 
 let settingsQueue = null;
-/** Coalesce rapid changes (slider drags) into one write per frame-ish. */
-function pushSettings(patch) {
+/**
+ * Coalesce rapid changes into one write. Sliders debounce; discrete controls
+ * send straight away — a debounced pin left the main process still thinking
+ * hide-on-blur was on, so a click elsewhere in that gap closed the window the
+ * user had just pinned.
+ */
+function pushSettings(patch, { immediate = true } = {}) {
   settingsQueue = { ...(settingsQueue || {}), ...patch };
   clearTimeout(pushSettings.timer);
-  pushSettings.timer = setTimeout(() => {
+  const flush = () => {
     const payload = settingsQueue;
     settingsQueue = null;
-    window.api.setSettings(payload);
-  }, 70);
+    if (payload) window.api.setSettings(payload);
+  };
+  if (immediate) flush();
+  else pushSettings.timer = setTimeout(flush, 70);
 }
 
 /* ------------------------------- switching ------------------------------- */
@@ -420,7 +427,7 @@ function wire() {
 
   $('#rng-opacity').addEventListener('input', (event) => {
     $('#val-opacity').textContent = `${event.target.value}%`;
-    pushSettings({ opacity: Number(event.target.value) / 100 });
+    pushSettings({ opacity: Number(event.target.value) / 100 }, { immediate: false });
   });
   $('#rng-tint').addEventListener('input', (event) => {
     const value = Number(event.target.value);
@@ -429,7 +436,7 @@ function wire() {
     if (state.settings.material !== 'none') {
       document.documentElement.style.setProperty('--tint', String(value / 100));
     }
-    pushSettings({ tint: value / 100 });
+    pushSettings({ tint: value / 100 }, { immediate: false });
   });
   $('#sel-poll').addEventListener('change', (event) =>
     pushSettings({ pollSeconds: Number(event.target.value) })
@@ -471,7 +478,9 @@ function wire() {
     if (event.key !== 'Escape') return;
     if (!$('#confirm').hidden) $('#confirm').hidden = true;
     else if (app.dataset.view === 'settings') setView('list');
-    else window.api.hide();
+    // Pinned means pinned: Escape backs out of a sheet, but never closes a
+    // window the user deliberately kept open.
+    else if (state && state.settings.hideOnBlur) window.api.hide();
   });
 }
 

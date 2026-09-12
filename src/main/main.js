@@ -44,6 +44,7 @@ let lastTrayKey = '';
 let cswapVersion = null;
 let placing = false; // suppress our own geometry events
 let movedTo = null; // where the user dragged it, for this run only
+let lastTrayBounds = null; // last non-empty tray rect, for when Windows stops reporting one
 
 const state = {
   accounts: [],
@@ -308,7 +309,15 @@ function createWindow() {
   win.on('blur', () => {
     if (!settings.get('hideOnBlur')) return;
     if (win.webContents.isDevToolsOpened()) return;
-    hidePopover();
+    // Windows fires blur transiently while the window is being repositioned or
+    // resized, and while a native menu opens — hiding on that alone made the
+    // popover vanish on its own. Re-check that focus really went elsewhere,
+    // and that the setting still says to hide, before acting on it.
+    setTimeout(() => {
+      if (!win || win.isDestroyed() || !win.isVisible()) return;
+      if (placing || win.isFocused() || !settings.get('hideOnBlur')) return;
+      hidePopover();
+    }, 120);
   });
 
   // The window outlives its "close": this is a tray app.
@@ -381,8 +390,11 @@ function positionNearTray() {
     return;
   }
 
-  const trayBounds = tray ? tray.getBounds() : null;
-  const hasTray = trayBounds && trayBounds.width > 0 && trayBounds.height > 0;
+  const trayBounds = trayRect();
+  const hasTray = Boolean(trayBounds);
+  // No tray rect and already on screen: leave it where it is rather than
+  // jumping to the corner of whichever display the pointer is over.
+  if (!hasTray && win.isVisible()) return;
   const point = hasTray
     ? { x: trayBounds.x, y: trayBounds.y }
     : screen.getCursorScreenPoint();
@@ -411,10 +423,25 @@ function positionNearTray() {
   });
 }
 
+/**
+ * The tray icon's rectangle, or null. Windows reports an empty rect while the
+ * icon sits in the overflow flyout and briefly when Explorer restarts, so the
+ * last good value is kept and reused rather than treated as "no tray".
+ */
+function trayRect() {
+  if (!tray) return lastTrayBounds;
+  const bounds = tray.getBounds();
+  if (bounds && bounds.width > 0 && bounds.height > 0) {
+    lastTrayBounds = bounds;
+    return bounds;
+  }
+  return lastTrayBounds;
+}
+
 /** The work area of whichever display the popover lives on. */
 function currentWorkArea() {
-  const bounds = tray && tray.getBounds().width ? tray.getBounds() : null;
-  return screen.getDisplayNearestPoint(bounds || screen.getCursorScreenPoint()).workArea;
+  const anchor = movedTo || trayRect() || screen.getCursorScreenPoint();
+  return screen.getDisplayNearestPoint(anchor).workArea;
 }
 
 /** Apply a size, clamped to the display, and remember it as hand-set. */
@@ -672,10 +699,10 @@ function maybeCaptureForDev() {
   setTimeout(async () => {
     try {
       if (view) {
+        const selector =
+          view === 'confirm' ? '.card:not(.active)' : view === 'settings' ? '#btn-settings' : view;
         await win.webContents.executeJavaScript(
-          view === 'confirm'
-            ? "document.querySelector('.card:not(.active)').click(); 'ok'"
-            : `document.querySelector('#btn-settings').click(); 'ok'`
+          `document.querySelector(${JSON.stringify(selector)}).click(); 'ok'`
         );
         await new Promise((resolve) => setTimeout(resolve, 700));
       }

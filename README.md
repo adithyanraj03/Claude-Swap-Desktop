@@ -59,14 +59,30 @@ npm start
 
 ## Screenshots
 
-| | |
-| --- | --- |
-| <img src="src/renderer/ui-list.png" width="300"/> | <img src="src/renderer/ui-light.png" width="300"/> |
-| Default list view | Light theme |
-| <img src="src/renderer/ui-confirm.png" width="300"/> | <img src="src/renderer/ui-settings.png" width="300"/> |
-| Confirm sheet (warns about live Claude Code sessions) | Glass, theme and behaviour settings |
-| <img src="src/renderer/ui-about.png" width="300"/> | |
-| Settings + about (shows the detected CLI version and path) | |
+<p align="center">
+  <img src="src/renderer/ui-list.png" alt="Default list view" width="460"/>
+</p>
+<p align="center"><sub>Default list view — one card per account with 5h / 7d meters and reset countdowns</sub></p>
+
+<p align="center">
+  <img src="src/renderer/ui-light.png" alt="Light theme" width="460"/>
+</p>
+<p align="center"><sub>Light theme</sub></p>
+
+<p align="center">
+  <img src="src/renderer/ui-confirm.png" alt="Confirm sheet" width="460"/>
+</p>
+<p align="center"><sub>Confirm sheet — warns about live Claude Code sessions before switching</sub></p>
+
+<p align="center">
+  <img src="src/renderer/ui-settings.png" alt="Settings" width="460"/>
+</p>
+<p align="center"><sub>Glass, theme and behaviour settings</sub></p>
+
+<p align="center">
+  <img src="src/renderer/ui-about.png" alt="Settings and about" width="460"/>
+</p>
+<p align="center"><sub>Settings + about — shows the detected CLI version and path</sub></p>
 
 ## What it does
 

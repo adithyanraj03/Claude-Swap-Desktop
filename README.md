@@ -1,29 +1,72 @@
-# Claude Swap — desktop tray app
+# Claude Swap
 
-A Windows 11 tray companion for [`claude-swap`](https://github.com/realiti4/claude-swap).
-Left-click the tray icon for a glass popover showing every managed account's 5h/7d
-quota; click an account to confirm and switch. Right-click for the full menu.
+<p align="center">
+  <img src="src/renderer/ui-wide.png" alt="Claude Swap — glass popover showing every Claude account's 5h and 7d quota" width="900"/>
+</p>
 
-The CLI stays the source of truth — this app shells out to `cswap … --json` and
-renders the result. Nothing about your accounts or credentials is stored here.
+<p align="center">
+  <img alt="MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"/>
+  <img alt="Electron 44" src="https://img.shields.io/badge/electron-44-blue.svg"/>
+  <img alt="Platform" src="https://img.shields.io/badge/platform-Windows%2011-lightgrey.svg"/>
+  <img alt="Runtime deps" src="https://img.shields.io/badge/runtime%20deps-0-green.svg"/>
+</p>
 
-By Adithya N Raj · adithyanraj03@gmail.com
+**A Windows 11 tray companion for [`claude-swap`](https://github.com/realiti4/claude-swap).**
+Left-click the tray icon for a glass popover showing every managed account's 5h / 7d
+quota with live reset countdowns; click an account to confirm and switch.
+Right-click for the full menu. The CLI stays the source of truth — this app shells
+out to `cswap … --json` and renders the result. Nothing about your accounts or
+credentials is ever stored here.
+
+---
+
+## Prerequisite: the claude-swap CLI
+
+Claude Swap is a front end, not a credential store — it needs the
+[claude-swap](https://github.com/realiti4/claude-swap) CLI installed and managing
+at least one account.
+
+```powershell
+# 1. install the CLI (Python 3.12+ required; Claude Code must be installed and logged in)
+uv tool install claude-swap        # recommended
+# pipx install claude-swap         # alternative
+
+# 2. add your accounts (log into Claude Code with an account, then:)
+cswap add
+cswap add
+
+# 3. verify
+cswap list
+```
+
+The app auto-detects the CLI at launch on `PATH` and in the well-known install
+locations (`~/.local/bin`, the uv tool Scripts dir, Python Scripts, `~/.cargo/bin`,
+looking for `cswap` / `cswap.exe` / `claude-swap.exe` / `cswap.cmd`). If it lives
+somewhere unusual, point Settings → CLI path at it.
 
 ## Install
 
 ```powershell
 npm install
-npm run dist      # builds dist/Claude Swap-2.0.0-x64.exe (installer) + portable
+npm run dist      # builds the installer + portable .exe into dist/
 ```
 
-Or run it straight from source:
+Or run straight from source:
 
 ```powershell
 npm start
 ```
 
-Requires `claude-swap` on `PATH` (or in `~/.local/bin`). Auto-detected at launch;
-override the path in Settings if it lives somewhere unusual.
+## Screenshots
+
+| | |
+| --- | --- |
+| <img src="src/renderer/ui-list.png" width="300"/> | <img src="src/renderer/ui-light.png" width="300"/> |
+| Default list view | Light theme |
+| <img src="src/renderer/ui-confirm.png" width="300"/> | <img src="src/renderer/ui-settings.png" width="300"/> |
+| Confirm sheet (warns about live Claude Code sessions) | Glass, theme and behaviour settings |
+| <img src="src/renderer/ui-about.png" width="300"/> | |
+| Settings + about (shows the detected CLI version and path) | |
 
 ## What it does
 
@@ -54,8 +97,8 @@ fitting-to-content once you have sized it by hand; double-click the grip, or use
 headroom, refresh, open the dashboard, open the `cswap` TUI in a terminal, and
 every setting below.
 
-**Auto refresh** — every 60s while the popover is open, every 5 minutes while it is
-hidden, plus on show, after any switch, and on wake from sleep. Countdowns tick
+**Auto refresh** — every 60s while the popover is open, every 5 minutes while it
+is hidden, plus on show, after any switch, and on wake from sleep. Countdowns tick
 locally every second between polls.
 
 ## Settings
@@ -122,3 +165,17 @@ npm start -- --hidden                          # start in the tray without showi
 
 There are no runtime dependencies; `electron` and `electron-builder` are the only
 devDependencies.
+
+## Credits
+
+- **[claude-swap](https://github.com/realiti4/claude-swap)** by
+  [realiti4](https://github.com/realiti4) — the multi-account switcher this app
+  wraps. It owns account management, credential storage, auto-switching, and the
+  usage-rate pacing; Claude Swap only renders its `--json` output and sends
+  `cswap switch` on your behalf. All CLI features (TUI, `cswap auto`, session
+  mode, backups) keep working independently of this app.
+- [Electron](https://www.electronjs.org/) for the windowing.
+
+---
+
+MIT © 2026 Adithya N Raj · adithyanraj03@gmail.com
